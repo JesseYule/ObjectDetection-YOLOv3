@@ -1,4 +1,4 @@
-datanum = 100
+datanum = 50
 
 # 取10%的数据作为测试集
 testnum = round(datanum * 0.1)

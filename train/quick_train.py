@@ -27,7 +27,7 @@ test_tfrecord = "../data/images_test.tfrecords"
 
 parser = Parser(IMAGE_H, IMAGE_W, ANCHORS, NUM_CLASSES)
 trainset = dataset(parser, train_tfrecord, batch_size=BATCH_SIZE, shuffle=SHUFFLE_SIZE)
-testset = dataset(parser, test_tfrecord, batch_size=5, shuffle=None)  # 这里我用全部测试集来训练，方便看效果
+testset = dataset(parser, test_tfrecord, batch_size=BATCH_SIZE, shuffle=None)  # 这里我用全部测试集来训练，方便看效果
 
 
 is_training = tf.placeholder(tf.bool)  # 占位符，运行时必须传入值
