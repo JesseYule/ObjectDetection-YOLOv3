@@ -37,8 +37,6 @@ DDK与Mind Studio的安装可能会遇到较多问题，建议观看华为提供
 
 下载后，把需要标记的图像放在“image/001”，运行main.py，在image Dir输入1，点击load，即可显示图片，通过点击目标的左上角和右下角得到边界框坐标数据，点击下方的next，即可继续标注下一张图片，要注意的是，图片的后缀必须是JPEG。
 
-![图片 1](readme_image/1.png)
-
 标注完成后，在“labels/001”得到标注信息。
 
 ![2](readme_image/2.png)
@@ -53,11 +51,7 @@ DDK与Mind Studio的安装可能会遇到较多问题，建议观看华为提供
 
 因为数据量较大，每次训练都直接读取的话效率就很低，所以tensorflow就提供了一种较为高效的数据读取方式tfrecord，可通过convert_tfrecord.py基于图像数据生成tfrecord，注意，这个代码需要运行两遍，第一次是生成trainset，第二次是生成testset，通过修改代码中的文件名实现。
 
-到目前为止，我们就完成了数据的预处理，可通过运行“train/show_images_from_tfrecord.py”查看效果：
-
-![4](readme_image/4.png)
-
-如果看到图片已经包含了边界框、分类名，那就说明预处理成功。
+到目前为止，我们就完成了数据的预处理，可通过运行“train/show_images_from_tfrecord.py”查看效果，如果看到图片已经包含了边界框、分类名，那就说明预处理成功。
 
 
 
