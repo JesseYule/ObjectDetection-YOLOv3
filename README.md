@@ -1,4 +1,5 @@
-# 基于YOLOv3的目标检测模型
+基于YOLOv3的目标检测模型
+
 **1.**  **项目简述**
 
 本项目主要面向华为Atlas 500进行开发，基于以下项目进行简化修改：
@@ -20,7 +21,7 @@
 2. Atlas 500 DDK，详情可参考《Atlas 500 DDK安装指南》
 
 
-华为官当也有提供一些值得阅读参考的文档：
+华为官方也有提供一些值得阅读参考的文档：
 
 * 《api-matrix-atlas500app》
 
@@ -38,7 +39,7 @@
 
 * 《华为Atlas 500 智能小站 技术白皮书（型号 3000 3010）02》
 
-
+<br/>
 
 **2.  代码说明**
 
@@ -66,15 +67,17 @@
 
 到目前为止，我们就完成了数据的预处理，可通过运行“train/show_images_from_tfrecord.py”查看效果，如果看到图片已经包含了边界框、分类名，那就说明预处理成功。
 
-
+<br/>
 
 **2.2 训练模型**
 
-在训练之前，还要检查一下train/quick_train.py、train/convert_tfrecord.py中的类别数是否符合你的数据。
+在训练之前，还要检查一下train/quick_train.py、train/convert_weight.py中的类别数是否符合你的数据。
+
+另一方面，因为我们其实是在yolov3的基础上做fine tuning，所以需要下载预训练模型，也就是yolov3.weights，可在https://github.com/opensourceai/yolov3-tensorflow-cn找到。
 
 可直接运行“train/quick_train.py”训练模型，训练之前可修改部分参数，如shuffle_size、steps、训练集测试集的batch size等等。
 
-
+<br/>
 
 **2.3 训练结果**
 
@@ -98,11 +101,11 @@
 
 从另一个角度来说，可以认为目前的模型特征提取能力较强，可是泛化能力较弱，增大数据量应该可以改善这个现象。
 
-
+<br/>
 
 **2.4 模型转化**
 
-训练好模型，再次运行train/convert_tfrecord.py，但这次要注意，需要注释掉读取yolov3.weights的代码，因为我们需要从已经训练好的ckpt文件中读取模型结构和参数，从而转化为pb格式：
+训练好模型，再次运行train/convert_weight.py，但这次要注意，需要注释掉读取yolov3.weights的代码，因为我们需要从已经训练好的ckpt文件中读取模型结构和参数，从而转化为pb格式：
 
 ![7](readme_image/7.png)
 
@@ -114,13 +117,13 @@
 
 ![8](readme_image/8.png)
 
-
+<br/>
 
 **2.5 编译与运行**
 
 得到了om文件之后，还需要基于华为的matrix框架，对模型进行编译和部署，这方面的内容需要具体参考华为的文档，这里暂不展开说明。
 
-
+<br/>
 
 **3 学习笔记**
 
