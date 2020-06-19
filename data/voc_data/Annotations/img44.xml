@@ -1,0 +1,26 @@
+<annotation verified="yes">
+  <folder>JPEGImages</folder>
+  <filename>img00111</filename>
+  <path>E:\&#25968;&#25454;&#38598;\1-700\VOC2007\JPEGImages\img00111.jpg</path>
+  <source>
+    <database>Unknown</database>
+  </source>
+  <size>
+    <width>570</width>
+    <height>378</height>
+    <depth>3</depth>
+  </size>
+  <segmented>0</segmented>
+  <object>
+    <name>person</name>
+    <pose>Unspecified</pose>
+    <truncated>1</truncated>
+    <difficult>0</difficult>
+    <bndbox>
+      <xmin>357</xmin>
+      <ymin>246</ymin>
+      <xmax>481</xmax>
+      <ymax>378</ymax>
+    </bndbox>
+  </object>
+</annotation>

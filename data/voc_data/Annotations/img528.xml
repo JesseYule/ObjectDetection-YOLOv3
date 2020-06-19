@@ -1,0 +1,26 @@
+<annotation verified="yes">
+  <folder>JPEGImages</folder>
+  <filename>002694</filename>
+  <path>E:\VOC&#25968;&#25454;&#38598;\VOCtest_06-Nov-2007\VOCdevkit\VOC2007\JPEGImages\002694.jpg</path>
+  <source>
+    <database>Unknown</database>
+  </source>
+  <size>
+    <width>500</width>
+    <height>375</height>
+    <depth>3</depth>
+  </size>
+  <segmented>0</segmented>
+  <object>
+    <name>person</name>
+    <pose>Unspecified</pose>
+    <truncated>1</truncated>
+    <difficult>1</difficult>
+    <bndbox>
+      <xmin>82</xmin>
+      <ymin>2</ymin>
+      <xmax>402</xmax>
+      <ymax>375</ymax>
+    </bndbox>
+  </object>
+</annotation>

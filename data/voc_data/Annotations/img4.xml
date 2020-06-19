@@ -1,0 +1,26 @@
+<annotation verified="yes">
+  <folder>JA</folder>
+  <filename>img00071</filename>
+  <path>E:\&#25968;&#25454;&#38598;\VOC2007_img\JA\img00071.jpg</path>
+  <source>
+    <database>Unknown</database>
+  </source>
+  <size>
+    <width>500</width>
+    <height>375</height>
+    <depth>3</depth>
+  </size>
+  <segmented>0</segmented>
+  <object>
+    <name>person</name>
+    <pose>Unspecified</pose>
+    <truncated>1</truncated>
+    <difficult>0</difficult>
+    <bndbox>
+      <xmin>97</xmin>
+      <ymin>107</ymin>
+      <xmax>328</xmax>
+      <ymax>375</ymax>
+    </bndbox>
+  </object>
+</annotation>

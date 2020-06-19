@@ -259,8 +259,8 @@ def load_weights(var_list, weights_file):
         print("=> loading ", var2.name)
         # do something only if we process conv layer
         if 'Conv' in var1.name.split('/')[-2]:
-
-            if 'batch_norm' in var2.name.split('/')[-2]:
+            # check type of next layer
+            if 'BatchNorm' in var2.name.split('/')[-2]:
                 # load batch norm params
                 gamma, beta, mean, var = var_list[i + 1:i + 5]
                 batch_norm_vars = [beta, gamma, mean, var]
@@ -288,7 +288,6 @@ def load_weights(var_list, weights_file):
             num_params = np.prod(shape)
 
             # 这是什么沙雕模型文件需要这种加载方式
-
             var_weights = weights[ptr:ptr + num_params].reshape(
                 (shape[3], shape[2], shape[0], shape[1]))  # 沙雕模型文件
             # remember to transpose to column-major  维度交换
@@ -296,7 +295,6 @@ def load_weights(var_list, weights_file):
             ptr += num_params
             assign_ops.append(
                 tf.assign(var1, var_weights, validate_shape=True))
-
             i += 1
 
     return assign_ops
@@ -342,11 +340,8 @@ def bbox_iou(A, B):
 
 
 def evaluate(y_pred, y_true, iou_thresh=0.5, score_thresh=0.3):
-
     num_images = y_true[0].shape[0]  # 检查的图片数量 Batch_size(8)
-
     num_classes = y_true[0][0][..., 5:].shape[-1]
-
     # 以为class_id 初始化字典
     true_labels_dict = {i: 0 for i in range(num_classes)}  # {class: count}
     pred_labels_dict = {i: 0 for i in range(num_classes)}
@@ -380,16 +375,13 @@ def evaluate(y_pred, y_true, iou_thresh=0.5, score_thresh=0.3):
         pred_confs = y_pred[1][i:i + 1]  # [Batch_size,10647,1]
         pred_probs = y_pred[2][i:i + 1]  # [Batch_size,10647,class_num]
 
-        # print("pred_boxes: ", len(pred_boxes))
         # 进过非最大抑制处理后得到最终的
         pred_boxes, pred_scores, pred_labels = cpu_nms(pred_boxes, pred_confs * pred_probs, num_classes,
                                                        score_thresh=score_thresh, iou_thresh=iou_thresh)
 
         # 所有有效的存在真实值的 boxes
         true_boxes = np.array(true_boxes_list)
-
         box_centers, box_sizes = true_boxes[:, 0:2], true_boxes[:, 2:4]
-
 
         # 坐标转换
         true_boxes[:, 0:2] = box_centers - box_sizes / 2.  # 左上角坐标

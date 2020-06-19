@@ -14,6 +14,64 @@ class Parser(object):
         self.image_w = image_w
         self.debug = debug
 
+    def flip_left_right(self, image, gt_boxes):
+
+        w = tf.cast(tf.shape(image)[1], tf.float32)  # 得到图像shape
+        image = tf.image.flip_left_right(image)
+
+        xmin, ymin, xmax, ymax, label = tf.unstack(gt_boxes, axis=1)
+        xmin, ymin, xmax, ymax = w - xmax, ymin, w - xmin, ymax
+        gt_boxes = tf.stack([xmin, ymin, xmax, ymax, label], axis=1)
+
+        return image, gt_boxes
+
+    def random_distort_color(self, image, gt_boxes):
+
+        image = tf.image.random_brightness(image, max_delta=32. / 255.)
+        image = tf.image.random_saturation(image, lower=0.8, upper=1.2)
+        image = tf.image.random_hue(image, max_delta=0.2)
+        image = tf.image.random_contrast(image, lower=0.8, upper=1.2)
+
+        return image, gt_boxes
+
+    def random_blur(self, image, gt_boxes):
+
+        gaussian_blur = lambda image: cv2.GaussianBlur(image, (5, 5), 0)
+        h, w = image.shape.as_list()[:2]
+        image = tf.py_func(gaussian_blur, [image], tf.uint8)
+        image.set_shape([h, w, 3])
+
+        return image, gt_boxes
+
+    def random_crop(self, image, gt_boxes, min_object_covered=0.8, aspect_ratio_range=[0.8, 1.2],
+                    area_range=[0.5, 1.0]):
+
+        #  h,w = tf.cast(tf.shape(image)[:2], tf.float32)
+        h, w = tf.cast(tf.shape(image)[0], tf.float32), tf.cast(tf.shape(image)[1], tf.float32)
+        xmin, ymin, xmax, ymax, label = tf.unstack(gt_boxes, axis=1)
+        bboxes = tf.stack([ymin / h, xmin / w, ymax / h, xmax / w], axis=1)
+        bboxes = tf.clip_by_value(bboxes, 0, 1)
+        begin, size, dist_boxes = tf.image.sample_distorted_bounding_box(
+            tf.shape(image),
+            bounding_boxes=tf.expand_dims(bboxes, axis=0),
+            min_object_covered=min_object_covered,
+            aspect_ratio_range=aspect_ratio_range,
+            area_range=area_range)
+        # NOTE dist_boxes with shape: [ymin, xmin, ymax, xmax] and in values in range(0, 1)
+        # Employ the bounding box to distort the image.
+        croped_box = [dist_boxes[0, 0, 1] * w, dist_boxes[0, 0, 0] * h, dist_boxes[0, 0, 3] * w,
+                      dist_boxes[0, 0, 2] * h]
+
+        croped_xmin = tf.clip_by_value(xmin, croped_box[0], croped_box[2]) - croped_box[0]
+        croped_ymin = tf.clip_by_value(ymin, croped_box[1], croped_box[3]) - croped_box[1]
+        croped_xmax = tf.clip_by_value(xmax, croped_box[0], croped_box[2]) - croped_box[0]
+        croped_ymax = tf.clip_by_value(ymax, croped_box[1], croped_box[3]) - croped_box[1]
+
+        image = tf.slice(image, begin, size)
+        gt_boxes = tf.stack([croped_xmin, croped_ymin, croped_xmax, croped_ymax, label], axis=1)
+
+        return image, gt_boxes
+
     def preprocess(self, image, gt_boxes):
         image, gt_boxes = utils.resize_image_correct_bbox(image, gt_boxes, self.image_h, self.image_w)
 
@@ -138,7 +196,6 @@ class Parser(object):
         return self.preprocess(image, gt_boxes)
 
 
-# 处理好数据，返回可以直接被模型利用的格式，主要都是被调用get_next函数
 class dataset(object):
     def __init__(self, parser, tfrecords_path, batch_size, shuffle=None, repeat=True):
         self.parser = parser

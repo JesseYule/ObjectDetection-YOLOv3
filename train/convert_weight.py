@@ -1,13 +1,9 @@
-# import sys
-# sys.path.append("/data/videoAnalysis/simyolov3")
-
 import os
 import sys
-import wget
 import time
 import argparse
 import tensorflow as tf
-from core import YOLOv3, utils
+from core import yolov3, utils
 
 
 class parser(argparse.ArgumentParser):
@@ -15,12 +11,14 @@ class parser(argparse.ArgumentParser):
     def __init__(self, description):
         super(parser, self).__init__(description)
 
+        # 这里要根据读取的文件名修改
         self.add_argument(
-            "--ckpt_file", "-cf", default='../checkpoint/cpk-10000', type=str,
+            "--ckpt_file", "-cf", default='../checkpoint/cpk-1', type=str,
             help="[default: %(default)s] The checkpoint file ...",
             metavar="<CF>",
         )
 
+        # 这里的num_calsses要根据实际情况修改，记得修改！！！
         self.add_argument(
             "--num_classes", "-nc", default=1, type=int,
             help="[default: %(default)s] The number of classes ...",
@@ -80,7 +78,7 @@ def main(argv):
     anchors = utils.get_anchors(flags.anchors_path, flags.image_h, flags.image_w)
     # print(anchors)
     # exit()
-    model = YOLOv3.yolov3(flags.num_classes, anchors)
+    model = yolov3.yolov3(flags.num_classes, anchors)
 
     with tf.Graph().as_default() as graph:
         sess = tf.Session(graph=graph)
@@ -96,7 +94,6 @@ def main(argv):
         print("=>", boxes.name[:-2], scores.name[:-2])
         # cpu 运行是恢复模型所需要的网络节点的名字
         cpu_out_node_names = [boxes.name[:-2], scores.name[:-2]]
-        print('cpu_out_node_names: ', cpu_out_node_names)
         boxes, scores, labels = utils.gpu_nms(boxes, scores, flags.num_classes,
                                               score_thresh=flags.score_threshold,
                                               iou_thresh=flags.iou_threshold)
@@ -105,13 +102,23 @@ def main(argv):
         gpu_out_node_names = [boxes.name[:-2], scores.name[:-2], labels.name[:-2]]
         feature_map_1, feature_map_2, feature_map_3 = feature_map
         saver = tf.train.Saver(var_list=tf.global_variables(scope='yolov3'))
+        our_out_node_names = ["yolov3/yolo-v3/feature_map_1", "yolov3/yolo-v3/feature_map_2", "yolov3/yolo-v3/feature_map_3"]
 
+        # 只有第一次需要读取预训练参数yolov3.weights
+
+        # if flags.convert:
+        #     load_ops = utils.load_weights(tf.global_variables(scope='yolov3'), flags.weights_path)
+        #     sess.run(load_ops)
+        #     save_path = saver.save(sess, save_path=flags.ckpt_file)
+        #     print('=> model saved in path: {}'.format(save_path))
+
+        # print(flags.freeze)
         if flags.freeze:
             saver.restore(sess, flags.ckpt_file)
             print('=> checkpoint file restored from ', flags.ckpt_file)
             utils.freeze_graph(sess, '../checkpoint/yolov3_cpu_nms.pb', cpu_out_node_names)
             utils.freeze_graph(sess, '../checkpoint/yolov3_gpu_nms.pb', gpu_out_node_names)
+            utils.freeze_graph(sess, '../checkpoint/ouryolov3.pb', our_out_node_names)
 
 
-if __name__ == "__main__":
-    main(sys.argv)
+if __name__ == "__main__": main(sys.argv)

@@ -11,9 +11,9 @@ IMAGE_H, IMAGE_W = 416, 416
 BATCH_SIZE = 1
 SHUFFLE_SIZE = 1
 
-train_tfrecord = "../data/images_test.tfrecords"
-anchors = utils.get_anchors('../data/object_anchors.txt', IMAGE_H, IMAGE_W)
-classes = utils.read_coco_names('../data/object.names')
+train_tfrecord = "../data/voc_data/images_train.tfrecords"
+anchors = utils.get_anchors('../data/objects.txt', IMAGE_H, IMAGE_W)
+classes = utils.read_coco_names('../data/objects.names')
 # print(classes)
 num_classes = len(classes)  # 识别的种类
 

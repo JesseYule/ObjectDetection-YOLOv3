@@ -1,13 +1,9 @@
 # 基于YOLOv3的目标检测模型
 **1.**  **项目简述**
 
-本项目主要面向华为Atlas 500进行开发！面向华为Atlas 500进行开发！面向华为Atlas 500进行开发！所以你会看到代码中很多奇怪的地方，比如为什么不用tensorflow提供的BN层，而需要自己实现一个BN层，诸如此类的，都是因为目前很多tensorflow的算子华为不支持！目前很多tensorflow的算子华为不支持！目前很多tensorflow的算子华为不支持！
-
-所以如果你想要了解如何应用YOLOv3进行目标检测，可以看一下本项目的来源：
+本项目主要面向华为Atlas 500进行开发，基于以下项目进行简化修改：
 
 * https://github.com/opensourceai/yolov3-tensorflow-cn
-
-当然，我也在该项目的基础上进行了简化，个人觉得整体的代码结构是更加清晰易懂的。
 
 在了解本模型前，在理论方面，需对CNN等基础神经网络理论有一定了解，同时建议按顺序阅读YOLO系列三篇论文：
 
@@ -19,13 +15,28 @@
 
 在环境方面，需要安装:
 
-1. tensorflow1.x版本（atlas 500不支持2.x版本）
+1. tensorflow1.x版本（atlas 500不支持2.x版本，**强烈建议使用tensorflow1.11，该版本对算子支持度最高，如果使用其他版本的tensorflow运行本项目在利用omg转化模型时会报错**）
 
 2. Atlas 500 DDK，详情可参考《Atlas 500 DDK安装指南》
 
-3. Mind Studio，详情可参考《Ascend 310 Mind Studio工具安装指南》。
 
-DDK与Mind Studio的安装可能会遇到较多问题，建议观看华为提供的Atlas 200DK系列教程（[点击访问](https://www.huaweicloud.com/ascend/Institute)），按照视频指示安装。
+华为官当也有提供一些值得阅读参考的文档：
+
+* 《api-matrix-atlas500app》
+
+* 《Atlas 500 应用软件开发指南 01》
+
+* 《Atlas 500 软件开发指导书 02》
+
+* 《Atlas 500 模型转换指导 02》
+
+* 《Atlas 500 用户指南 04》
+
+* 《Atlas 500 算子清单 02》
+
+* 《Atlas 智能边缘管理系统 用户指南 05》
+
+* 《华为Atlas 500 智能小站 技术白皮书（型号 3000 3010）02》
 
 
 
@@ -35,27 +46,31 @@ DDK与Mind Studio的安装可能会遇到较多问题，建议观看华为提供
 
 目标检测对图像的标注主要是标注边界框的信息，可以是边界框的左上角坐标和边界框的宽高长度，而本模型则标记边界框的左上角和右下角坐标，工具是BBox-Label-Tool，可在GitHub下载（[点击打开](https://github.com/puzzledqs/BBox-Label-Tool)）。
 
+下载的时候需要注意，如果需要进行多目标的标注，需要在branch选择multi-class。
+
 下载后，把需要标记的图像放在“image/001”，运行main.py，在image Dir输入1，点击load，即可显示图片，通过点击目标的左上角和右下角得到边界框坐标数据，点击下方的next，即可继续标注下一张图片，要注意的是，图片的后缀必须是JPEG。
 
 标注完成后，在“labels/001”得到标注信息。
 
 ![2](readme_image/2.png)
 
-到这里就完成了图像数据的标注，项目中已经提供了一些已经处理好的数据文件。
+到这里就完成了图像数据的标注，项目中已经提供了少量VOC数据集。
 
 接下来就是把标注的数据和原图像整合在一起，利用tensorflow进行处理。
 
-标注完成后，可把图像存放在“data/images”，把标注文件放在“data/bbox”，然后运行readfile.py，得到我们需要的训练集和测试集。这里的目的是把图片在项目中的位置、边界框坐标、分类结果整合在一个txt文件里，从而让tensorflow做进一步的处理。
+标注完成后，可把图像存放在“data/voc_data/images”，把标注文件放在“data/voc_data/Annotations”(当然你也可以新建一个文件夹放你的数据，因为我这里用的是voc数据集所以才命名为voc_data)，然后运行data/voc_data/readXML.py，得到我们需要的训练集和测试集。这里的目的是把图片在项目中的位置、边界框坐标、分类结果整合在一个txt文件里，从而让tensorflow做进一步的处理。
 
 ![3](readme_image/3.png)
 
-因为数据量较大，每次训练都直接读取的话效率就很低，所以tensorflow就提供了一种较为高效的数据读取方式tfrecord，可通过convert_tfrecord.py基于图像数据生成tfrecord，注意，这个代码需要运行两遍，第一次是生成trainset，第二次是生成testset，通过修改代码中的文件名实现。
+因为数据量较大，每次训练都直接读取的话效率就很低，所以tensorflow就提供了一种较为高效的数据读取方式tfrecord，可通过train/convert_tfrecord.py基于图像数据生成tfrecord，注意，这个代码需要运行两遍，第一次是生成trainset，第二次是生成testset，通过修改代码中的文件名实现。
 
 到目前为止，我们就完成了数据的预处理，可通过运行“train/show_images_from_tfrecord.py”查看效果，如果看到图片已经包含了边界框、分类名，那就说明预处理成功。
 
 
 
 **2.2 训练模型**
+
+在训练之前，还要检查一下train/quick_train.py、train/convert_tfrecord.py中的类别数是否符合你的数据。
 
 可直接运行“train/quick_train.py”训练模型，训练之前可修改部分参数，如shuffle_size、steps、训练集测试集的batch size等等。
 
@@ -85,9 +100,34 @@ DDK与Mind Studio的安装可能会遇到较多问题，建议观看华为提供
 
 
 
-**3 针对Atlas500的离线模型转化**
+**2.4 模型转化**
 
-虽然本质上这只是一个普通的YOLOv3目标检测模型，但我在该模型上花费的主要精力在于使其能转化成Atlas 500支持的离线模型格式，其中的难点在于如何用Atlas 500支持的算子改写模型。关于如何修改算子、如何把tensorflow模型转化成Atlas 500支持的离线模型格式，之后我会继续在博客补充详细说明。
+训练好模型，再次运行train/convert_tfrecord.py，但这次要注意，需要注释掉读取yolov3.weights的代码，因为我们需要从已经训练好的ckpt文件中读取模型结构和参数，从而转化为pb格式：
+
+![7](readme_image/7.png)
+
+这里保存了三个pb文件，前两个是原本有的，最后一个是我自定义输出节点的，这里简单说一下三者的区别，第一个cpu.pb是指推理的时候，GPU通过调用pb输出初步结果（边界框坐标、置信度、分类结果），但是不进行NMS删除重复的边界框，而是交给CPU实现，而gpu.pb则是指GPU把NMS的过程也一并计算了，至于我自己定义的our.pb，则是只需要GPU把feature map计算出来就好，后面所有的后处理都交给CPU计算。
+
+具体选择在推理时让GPU和CPU分别计算什么内容，需要根据实际情况判断。
+
+得到pb文件之后，我们就可以利用Atlas500DDK的omg工具转化为om格式的模型文件
+
+![8](readme_image/8.png)
+
+
+
+**2.5 编译与运行**
+
+得到了om文件之后，还需要基于华为的matrix框架，对模型进行编译和部署，这方面的内容需要具体参考华为的文档，这里暂不展开说明。
+
+
+
+**3 学习笔记**
+
+* [工业界的深度学习（一）：服务器训练环境的搭建](https://blog.csdn.net/jesseyule/article/details/104601282)
+* [工业界的深度学习（二）：边缘场景的模型落地与Atlas 500](https://blog.csdn.net/jesseyule/article/details/104683695)
+* [工业界的深度学习（三）：针对华为Atlas 500的模型转换及tensorflow算子修改心得](https://blog.csdn.net/jesseyule/article/details/104931677)
+* [工业界的深度学习（四）：tensorflow架构及针对Atlas500的算子修改](https://blog.csdn.net/jesseyule/article/details/106149346)
 
 
 
