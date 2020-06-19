@@ -73,7 +73,7 @@
 
 在训练之前，还要检查一下train/quick_train.py、train/convert_weight.py中的类别数是否符合你的数据。
 
-另一方面，因为我们其实是在yolov3的基础上做fine tuning，所以需要下载预训练模型，也就是yolov3.weights，可在https://github.com/opensourceai/yolov3-tensorflow-cn找到。
+另一方面，因为我们其实是在yolov3的基础上做fine tuning，所以需要下载预训练模型，也就是yolov3.weights，可在https://github.com/opensourceai/yolov3-tensorflow-cn 找到。
 
 可直接运行“train/quick_train.py”训练模型，训练之前可修改部分参数，如shuffle_size、steps、训练集测试集的batch size等等。
 
