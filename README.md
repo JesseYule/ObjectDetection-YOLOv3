@@ -121,7 +121,13 @@
 
 **2.5 编译与运行**
 
-得到了om文件之后，还需要基于华为的matrix框架，对模型进行编译和部署，这方面的内容需要具体参考华为的文档，这里暂不展开说明。
+得到了om文件之后，还需要基于华为的matrix框架，对模型进行编译和部署，编译可参考华为的Sample：
+
+https://gitee.com/HuaweiAtlas/samples/tree/master/Samples/InferObjectDetection
+
+最后附一个在Atlas500上运行时的画面
+
+![9](readme_image/9.png)
 
 <br/>
 
